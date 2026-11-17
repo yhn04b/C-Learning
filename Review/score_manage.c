@@ -213,7 +213,7 @@ int main(void)
         printf("malloc failed.");
         return 1;
     }
-    students[0] = (Student){"Tom", 18, 85};
+    students[0] = (Student){"Tom", 18, 89};
     students[1] = (Student){"Jack", 19, 92};
     students[2] = (Student){"Alice", 18, 95};
     students[3] = (Student){"Bob", 20, 78};
