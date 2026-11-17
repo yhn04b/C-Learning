@@ -1,0 +1,244 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    char name[20];
+    int age;
+    double score;
+}Student;
+
+void display_student(const Student student[]) {
+    printf("name: %s\n", student->name);
+    printf("age: %d\n", student->age);
+    printf("score: %.2f\n", student->score);
+}
+
+int get_name(char name[], size_t volume) {
+    char temp[100];
+    if(fgets(temp, sizeof(temp), stdin) == NULL) {
+        printf("Invalid input");
+        return 1;
+    }
+    if(strchr(temp, '\n') == NULL) {
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF) {
+        }
+        printf("Overwhelm!");
+        return 1;
+    }
+    temp[strcspn(temp, "\n")] = '\0';
+    if(strlen(temp) < volume) {
+        strcpy(name, temp);
+    }
+    else{
+        printf("Overwhelm!");
+        return 1;
+    }
+    return 0;
+}
+
+int search_student(Student student[], int student_num, const char name[]) {
+    int index = -1;
+    
+    for(int i = 0; i < student_num; i++) {
+        if (strcmp(student[i].name, name) == 0) {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) {
+        printf("Student not found!");
+        return -1;
+    }
+    return index;
+}
+
+int update_student(Student student[], int student_num, const char name[]) {
+    int index = search_student(student, student_num, name);
+    if (index == -1) {
+        return 1;
+    }
+    double new_score;
+    if (scanf("%lf", &new_score) != 1) {
+        printf("Invalid Input");
+        return 1;
+    }
+    if (new_score < 0 || new_score > 100) {
+        printf("Invalid Input(0 <= new_score <= 100)");
+        return 1;
+    }
+    
+    student[index].score = new_score;
+    display_student(&student[index]);
+    return 0;
+}
+
+int expand_student(Student **student, int *student_num, int *capacity) {  
+    Student *temp = realloc(
+        *student, (2 * *student_num) * sizeof(Student)
+    );
+    if (temp == NULL) {
+        printf("realloc failed");
+        return 1;
+    }
+    *capacity = 2 * *capacity;
+    *student = temp;
+    return 0;
+}
+
+int add_student(
+    Student **student,int *student_num, char name[],
+    size_t name_capacity, int *capacity
+) {
+    if (get_name(name, name_capacity) == 1) {
+        return 1;
+    }
+    for(int i = 0; i < *student_num; i++){
+        if (strcmp(name, (*student)[i].name) == 0) {
+            printf("Student existed");
+            return 1;
+        }
+    }
+
+    int age;
+    if (scanf("%d", &age) != 1) {
+        printf("Invalid Input.");
+        return 1;
+    }
+    if (age <= 0) {
+        printf("Invalid Input/");
+        return 1;
+    }
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+    }
+
+    double score;
+    if (scanf("%lf", &score) != 1) {
+        printf("Invalid Input.");
+        return 1;
+    }
+    if (score < 0 || score > 100) {
+        printf("Invalid Input.");
+        return 1;
+    }
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+    }
+
+    if(*student_num == *capacity) {
+        if(expand_student(student, student_num, capacity) == 1)
+        {
+            return 1;
+        }
+    }
+
+    strcpy((*student)[*student_num].name, name);
+    (*student)[*student_num].age = age;
+    (*student)[*student_num].score = score;
+
+    printf("Student added successfully!");
+    display_student(&(*student)[*student_num]);
+    (*student_num)++;
+    return 0;
+}
+
+int main(void)
+{
+    //Load in ------------------------------------------
+
+    char name[20];
+    size_t name_capacity = sizeof(name);
+    
+    int capacity = 5;
+    int student_num = 5;
+
+    Student *students = malloc( 
+        capacity * sizeof(Student)
+    );
+
+    if (students == NULL){
+        printf("malloc failed.");
+        return 1;
+    }
+    students[0] = (Student){"Tom", 18, 85};
+    students[1] = (Student){"Jack", 19, 92};
+    students[2] = (Student){"Alice", 18, 95};
+    students[3] = (Student){"Bob", 20, 78};
+    students[4] = (Student){"Lily", 19, 88};
+
+    while (1 > 0){
+        //Print menu ------------------------------
+        printf(
+        "========= Student Management System =========\n\n\n"
+        "1. Display all students\n"
+        "2. Search student\n"
+        "3. Add student\n"
+        "4. Update student score\n"
+        "5. Statistics\n"
+        "0. Exit\n\n\n"
+        "Please select: "
+        );
+
+        //Select ------------------------------------
+        int input;
+        if (scanf("%d", &input) != 1){
+            printf("Invalid input.");
+            int ch;
+            while ((ch = getchar()) != '\n' && ch != EOF){
+            }
+            continue;
+        }
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF){
+        }
+
+        switch (input)
+        {
+        case 1:
+            for(int i = 0; i < student_num; i++){
+                display_student(&students[i]);
+            }
+            break;
+        case 2:{
+            if(get_name(name, sizeof(name)) == 1)
+            {
+                break;
+            }
+            int index = search_student(students, student_num, name);
+            if(index == -1)
+            {
+                break;
+            }
+            display_student(&students[index]);
+            break;
+        }
+        case 3: {
+            if(add_student(
+                &students, &student_num, name,
+                name_capacity, &capacity) == 1) {
+                break;
+            }
+        }
+            break;
+        case 4:{
+            if(get_name(name, sizeof(name)) == 1)
+            {
+                break;
+            }
+            update_student(students, student_num, name);
+            break;
+        }
+        case 5:
+            printf("Under development......");
+            break;
+        case 0:
+            free(students);
+            students = NULL;
+            return 0;
+        default:
+            printf("Invalid input(0 <= input <= 5).\nPlease enter again.");
+            break;
+        }
+    }
+}
